@@ -3,9 +3,9 @@ import 'package:movies_flutter/src/models/movie_model.dart';
 
 class MovieHorizontal extends StatelessWidget {
   final List<Movie> movies;
-  // final Function nextPage;
+  final Function nextPage;
 
-  MovieHorizontal({@required this.movies});
+  MovieHorizontal({@required this.movies, @required this.nextPage});
 
   final _pageController =
       new PageController(initialPage: 1, viewportFraction: 0.3);
@@ -14,12 +14,12 @@ class MovieHorizontal extends StatelessWidget {
   Widget build(BuildContext context) {
     final _screenSize = MediaQuery.of(context).size;
 
-    // _pageController.addListener(() {
-    //   if (_pageController.position.pixels >=
-    //       _pageController.position.maxScrollExtent - 200) {
-    //     nextPage();
-    //   }
-    // });
+    _pageController.addListener(() {
+      if (_pageController.position.pixels >=
+          _pageController.position.maxScrollExtent - 200) {
+        nextPage();
+      }
+    });
 
     return Container(
       height: _screenSize.height * 0.2,
@@ -28,15 +28,15 @@ class MovieHorizontal extends StatelessWidget {
         controller: _pageController,
         // children: _tarjetas(context),
         itemCount: movies.length,
-        itemBuilder: (context, i) => _tarjeta(context, movies[i]),
+        itemBuilder: (context, i) => _card(context, movies[i]),
       ),
     );
   }
 
-  Widget _tarjeta(BuildContext context, Movie movie) {
+  Widget _card(BuildContext context, Movie movie) {
     movie.uniqueId = '${movie.id}-poster';
 
-    final tarjeta = Container(
+    final card = Container(
       margin: EdgeInsets.only(right: 15.0),
       child: Column(
         children: <Widget>[
@@ -63,9 +63,9 @@ class MovieHorizontal extends StatelessWidget {
     );
 
     return GestureDetector(
-      child: tarjeta,
+      child: card,
       onTap: () {
-        Navigator.pushNamed(context, 'detalle', arguments: movie);
+        Navigator.pushNamed(context, 'movie_detail', arguments: movie);
       },
     );
   }

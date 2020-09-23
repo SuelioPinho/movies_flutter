@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:movies_flutter/src/models/actor_model.dart';
 import 'package:movies_flutter/src/models/movie_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -8,15 +10,29 @@ class MoviesProvider {
   String _url = 'api.themoviedb.org';
   String _language = 'en-US';
 
+  bool _loading = false;
+
+  List<Movie> _popularMovies = new List();
+
   int _popularPage = 0;
+
+  final _popularStreamController = StreamController<List<Movie>>.broadcast();
+
+  Function(List<Movie>) get popularSink => _popularStreamController.sink.add;
+
+  Stream<List<Movie>> get popularStream => _popularStreamController.stream;
+
+  void disposeStreams() {
+    _popularStreamController?.close();
+  }
 
   Future<List<Movie>> _fetchMovies(Uri url) async {
     final resp = await http.get(url);
     final decodedData = json.decode(resp.body);
 
-    final peliculas = new Movies.fromJsonList(decodedData['results']);
+    final movies = new Movies.fromJsonList(decodedData['results']);
 
-    return peliculas.items;
+    return movies.items;
   }
 
   Future<List<Movie>> getMoviesNowPlaying() async {
@@ -27,9 +43,37 @@ class MoviesProvider {
   }
 
   Future<List<Movie>> getMoviesPopular() async {
-    final url = Uri.https(
-        _url, '3/movie/popular', {'api_key': _apikey, 'language': _language});
+    if (_loading) return [];
 
-    return await _fetchMovies(url);
+    _loading = true;
+
+    _popularPage++;
+
+    final url = Uri.https(_url, '3/movie/popular', {
+      'api_key': _apikey,
+      'language': _language,
+      'page': _popularPage.toString()
+    });
+
+    final resp = await _fetchMovies(url);
+
+    _popularMovies.addAll(resp);
+    popularSink(_popularMovies);
+
+    _loading = false;
+
+    return resp;
+  }
+
+  Future<List<Actor>> getCast(String peliId) async {
+    final url = Uri.https(_url, '3/movie/$peliId/credits',
+        {'api_key': _apikey, 'language': _language});
+
+    final resp = await http.get(url);
+    final decodedData = json.decode(resp.body);
+
+    final cast = new Cast.fromJsonList(decodedData['cast']);
+
+    return cast.actors;
   }
 }
