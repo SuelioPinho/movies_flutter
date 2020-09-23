@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movies_flutter/src/providers/movies_provider.dart';
+import 'package:movies_flutter/src/search/search_delegate.dart';
 import 'package:movies_flutter/src/widgets/card_swiper_widget.dart';
 import 'package:movies_flutter/src/widgets/movie_horizontal.dart';
 
@@ -16,7 +17,15 @@ class HomePage extends StatelessWidget {
         title: Text('Movies in theaters'),
         backgroundColor: Colors.indigoAccent,
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.search), onPressed: () {})
+          IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: DataSearch(),
+                  // query: 'Hola'
+                );
+              })
         ],
       ),
       body: Container(
@@ -69,19 +78,6 @@ class HomePage extends StatelessWidget {
                   return Center(child: CircularProgressIndicator());
                 }
               })
-          // StreamBuilder(
-          //   stream: movi.popularesStream,
-          //   builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
-          //     if (snapshot.hasData) {
-          //       return MovieHorizontal(
-          //         movies: snapshot.data,
-          //         nextPage: moviesProvider.getMoviesPopular(),
-          //       );
-          //     } else {
-          //       return Center(child: CircularProgressIndicator());
-          //     }
-          //   },
-          // ),
         ],
       ),
     );
